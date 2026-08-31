@@ -19,14 +19,8 @@ import {
 
 import { ROOMS, EMPLOYEES, CURRENT_USER } from "../data/mockData";
 
-import type { Booking } from "@/types/booking";
-
 import { useSnapshot } from "valtio";
-import { RoomsStore, RoomStoreActions } from "@/store/Rooms.store";
-
-interface BookingFormProps {
-  onSave: (booking: Booking) => void;
-}
+import { BookingsStore, BookingStoreActions } from "@/store/Bookings.store";
 
 const TIMES = Array.from({ length: 24 }, (_, i) => {
   const h = String(i).padStart(2, "0");
@@ -34,8 +28,8 @@ const TIMES = Array.from({ length: 24 }, (_, i) => {
   return [`${h}:00`, `${h}:30`];
 }).flat();
 
-export default function BookingForm({ onSave }: BookingFormProps) {
-  const snapshot = useSnapshot(RoomsStore);
+export default function BookingForm() {
+  const snapshot = useSnapshot(BookingsStore) as typeof BookingsStore;
 
   const form = snapshot.bookingForm;
 
@@ -44,10 +38,10 @@ export default function BookingForm({ onSave }: BookingFormProps) {
   const isEditing = !!snapshot.editBooking?.id;
 
   const toggleAttendee = (name: string) => {
-    const attendees = RoomsStore.bookingForm.attendees;
+    const attendees = BookingsStore.bookingForm.attendees;
 
     // eslint-disable-next-line react-hooks/immutability
-    RoomsStore.bookingForm.attendees = attendees.includes(name)
+    BookingsStore.bookingForm.attendees = attendees.includes(name)
       ? attendees.filter((attendee) => attendee !== name)
       : [...attendees, name];
   };
@@ -63,31 +57,17 @@ export default function BookingForm({ onSave }: BookingFormProps) {
       return;
     }
 
-    const booking: Booking = {
-      id: snapshot.editBooking?.id ?? `b${Date.now()}`,
-      roomId: form.roomId,
-      title: form.title,
-      organizer: CURRENT_USER,
-      attendees: [...form.attendees],
-      date: form.date,
-      startTime: form.startTime,
-      endTime: form.endTime,
-      notes: form.notes || undefined,
-    };
+    BookingStoreActions.onSave();
 
-    onSave(booking);
-
-    RoomStoreActions.closeForm();
+    BookingStoreActions.closeForm();
   };
-
-  console.log(snapshot, "Snapshot");
 
   return (
     <Dialog
       open={snapshot.formOpen}
       onOpenChange={(open) => {
         if (!open) {
-          RoomStoreActions.closeForm();
+          BookingStoreActions.closeForm();
         }
       }}
     >
@@ -108,7 +88,7 @@ export default function BookingForm({ onSave }: BookingFormProps) {
               placeholder="e.g. Sprint Planning"
               value={form.title}
               onChange={(e) => {
-                RoomsStore.bookingForm.title = e.target.value;
+                BookingsStore.bookingForm.title = e.target.value;
               }}
             />
           </div>
@@ -120,7 +100,7 @@ export default function BookingForm({ onSave }: BookingFormProps) {
             <Select
               value={form.roomId}
               onValueChange={(value) => {
-                RoomsStore.bookingForm.roomId = value;
+                BookingsStore.bookingForm.roomId = value;
               }}
             >
               <SelectTrigger>
@@ -147,7 +127,7 @@ export default function BookingForm({ onSave }: BookingFormProps) {
               value={form.date}
               min={today}
               onChange={(e) => {
-                RoomsStore.bookingForm.date = e.target.value;
+                BookingsStore.bookingForm.date = e.target.value;
               }}
             />
           </div>
@@ -161,7 +141,7 @@ export default function BookingForm({ onSave }: BookingFormProps) {
               <Select
                 value={form.startTime}
                 onValueChange={(value) => {
-                  RoomsStore.bookingForm.startTime = value;
+                  BookingsStore.bookingForm.startTime = value;
                 }}
               >
                 <SelectTrigger>
@@ -185,7 +165,7 @@ export default function BookingForm({ onSave }: BookingFormProps) {
               <Select
                 value={form.endTime}
                 onValueChange={(value) => {
-                  RoomsStore.bookingForm.endTime = value;
+                  BookingsStore.bookingForm.endTime = value;
                 }}
               >
                 <SelectTrigger>
@@ -240,7 +220,7 @@ export default function BookingForm({ onSave }: BookingFormProps) {
               placeholder="Any additional details..."
               value={form.notes}
               onChange={(e) => {
-                RoomsStore.bookingForm.notes = e.target.value;
+                BookingsStore.bookingForm.notes = e.target.value;
               }}
               rows={2}
             />
@@ -248,7 +228,7 @@ export default function BookingForm({ onSave }: BookingFormProps) {
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={RoomStoreActions.closeForm}>
+          <Button variant="outline" onClick={BookingStoreActions.closeForm}>
             Cancel
           </Button>
 

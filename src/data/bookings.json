@@ -1,0 +1,83 @@
+[
+  {
+    "id": "b1",
+    "roomId": "r1",
+    "title": "Q3 Planning Session",
+    "organizer": "Sarah Chen",
+    "attendees": ["Marcus Webb", "Priya Nair", "Tom Okafor", "Lena Bauer"],
+    "date": "2026-08-31",
+    "startTime": "09:00",
+    "endTime": "10:30",
+    "notes": "Bring printed roadmap docs"
+  },
+  {
+    "id": "b2",
+    "roomId": "r3",
+    "title": "All-Hands Engineering",
+    "organizer": "James Ruiz",
+    "attendees": ["Full Engineering Team"],
+    "date": "2026-08-31",
+    "startTime": "11:00",
+    "endTime": "12:00"
+  },
+  {
+    "id": "b3",
+    "roomId": "r2",
+    "title": "Design Review",
+    "organizer": "Lena Bauer",
+    "attendees": ["Sarah Chen", "Marcus Webb"],
+    "date": "2026-08-31",
+    "startTime": "14:00",
+    "endTime": "15:00"
+  },
+  {
+    "id": "b4",
+    "roomId": "r5",
+    "title": "Sprint Retrospective",
+    "organizer": "Tom Okafor",
+    "attendees": ["Backend Team"],
+    "date": "2026-09-01",
+    "startTime": "10:00",
+    "endTime": "11:30"
+  },
+  {
+    "id": "b5",
+    "roomId": "r1",
+    "title": "Investor Briefing Prep",
+    "organizer": "Sarah Chen",
+    "attendees": ["James Ruiz", "Priya Nair"],
+    "date": "2026-09-01",
+    "startTime": "13:00",
+    "endTime": "14:30"
+  },
+  {
+    "id": "b6",
+    "roomId": "r6",
+    "title": "Product Roadmap Review",
+    "organizer": "Priya Nair",
+    "attendees": ["Full Product Team"],
+    "date": "2026-09-02",
+    "startTime": "09:30",
+    "endTime": "11:00"
+  },
+  {
+    "id": "b7",
+    "roomId": "r4",
+    "title": "1:1 — Engineering Leads",
+    "organizer": "James Ruiz",
+    "attendees": ["Tom Okafor"],
+    "date": "2026-09-02",
+    "startTime": "15:00",
+    "endTime": "15:30"
+  },
+  {
+    "id": "b8",
+    "roomId": "r2",
+    "title": "UX Research Sync",
+    "organizer": "Lena Bauer",
+    "attendees": ["Marcus Webb", "External Researcher"],
+    "date": "2026-09-03",
+    "startTime": "11:00",
+    "endTime": "12:00"
+  }
+]

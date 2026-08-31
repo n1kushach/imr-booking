@@ -1,6 +1,5 @@
 import { ROOMS } from "@/data/mockData";
-import { BookingsStore } from "@/store/Bookings.store";
-import { RoomStoreActions } from "@/store/Rooms.store";
+import { BookingsStore, BookingStoreActions } from "@/store/Bookings.store";
 import { ViewStore } from "@/store/View.store";
 import { CalendarDays } from "lucide-react";
 
@@ -31,7 +30,7 @@ const Header = () => {
           </div>
           {viewSnapshot.view === "rooms" && (
             <button
-              onClick={() => RoomStoreActions.openNew()}
+              onClick={() => BookingStoreActions.openNew()}
               className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
             >
               <CalendarDays className="w-4 h-4" />

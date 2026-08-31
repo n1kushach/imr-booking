@@ -14,20 +14,21 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { ROOMS, CURRENT_USER } from "../data/mockData";
 import type { Booking } from "@/types/booking";
+import { useSnapshot } from "valtio";
+import { BookingsStore } from "@/store/Bookings.store";
 
 interface BookingsViewProps {
-  bookings: Booking[];
   onEdit: (booking: Booking) => void;
   onCancel: (id: string) => void;
   onNew: () => void;
 }
 
 export default function BookingsView({
-  bookings,
   onEdit,
   onCancel,
   onNew,
 }: BookingsViewProps) {
+  const bookingsSnapshot = useSnapshot(BookingsStore) as typeof BookingsStore;
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "mine" | "upcoming" | "past">(
     "upcoming",
@@ -42,7 +43,7 @@ export default function BookingsView({
   const isPast = (b: Booking) =>
     b.date < todayStr || (b.date === todayStr && b.endTime <= nowTime);
 
-  const filtered = bookings
+  const filtered = bookingsSnapshot.bookings
     .filter((b) => {
       const matchSearch =
         b.title.toLowerCase().includes(search.toLowerCase()) ||

@@ -1,5 +1,5 @@
-import type { Booking } from "../types/booking";
-import type { Room } from "../types/room";
+import type { Booking } from "@/types/booking";
+import type { Room } from "@/types/room";
 
 export const ROOMS: Room[] = [
   {

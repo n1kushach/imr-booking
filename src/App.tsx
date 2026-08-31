@@ -6,14 +6,16 @@ import type { Booking } from "./types/booking";
 import RoomsView from "@/components/RoomsView";
 import { useSnapshot } from "valtio";
 import { ViewStore } from "@/store/View.store";
-import { useRooms } from "@/services/api";
-import { RoomStoreActions } from "@/store/Rooms.store";
+import { useBookings, useRooms } from "@/services/api";
+import { BookingsStore, BookingStoreActions } from "@/store/Bookings.store";
 
 export default function App() {
   const viewSnapshot = useSnapshot(ViewStore);
-  const [bookings, setBookings] = useState<Booking[]>(INITIAL_BOOKINGS);
-
-  const { isLoading } = useRooms();
+  // bookingsSnapshot for dev
+  const bookingsSnapshot = useSnapshot(BookingsStore) as typeof BookingsStore;
+  console.log(bookingsSnapshot.bookings, "Bookings");
+  const { isLoading: isRoomsLoading } = useRooms();
+  const { isLoading: isBookingsLoading } = useBookings();
 
   // const handleSave = (booking: Booking) => {
   //   setBookings((prev) => {
@@ -25,21 +27,22 @@ export default function App() {
   // };
 
   const handleCancel = (id: string) => {
-    setBookings((prev) => prev.filter((b) => b.id !== id));
+    console.log(id, "ID");
+    // setBookings((prev) => prev.filter((b) => b.id !== id));
   };
 
   return (
     <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6">
       {viewSnapshot.view === "rooms" && (
         <RoomsView
-          isLoading={isLoading}
-          bookings={bookings}
-          onBook={(room) => RoomStoreActions.openNew(room)}
+          isBookingsLoading={isBookingsLoading}
+          isRoomsLoading={isRoomsLoading}
+          // bookings={bookings}
+          onBook={(room) => BookingStoreActions.openNew(room)}
         />
       )}
       {viewSnapshot.view === "schedule" && (
         <ScheduleView
-          bookings={bookings}
           onNew={(date) => console.log(date)}
           onEdit={() => {
             console.log("openEdit");
@@ -48,7 +51,7 @@ export default function App() {
       )}
       {viewSnapshot.view === "bookings" && (
         <BookingsView
-          bookings={bookings}
+          // bookings={bookings}
           onEdit={() => {
             console.log("openEdit");
           }}
@@ -57,15 +60,5 @@ export default function App() {
         />
       )}
     </main>
-
-    // {/* Booking form modal */}
-    // <BookingForm
-    //   open={formOpen}
-    //   onClose={() => setFormOpen(false)}
-    //   onSave={handleSave}
-    //   initial={editBooking}
-    //   preselectedRoom={preselectedRoom}
-    //   preselectedDate={preselectedDate}
-    // />
   );
 }
