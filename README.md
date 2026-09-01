@@ -216,7 +216,7 @@ The application uses **localStorage** to persist user-created and modified data:
 
 ## 🌐 Deployment
 
-The application is deployed on **Vercel** at: [Your Vercel URL]
+The application is deployed on **Vercel** at: https://imr-booking-git-main-nikolozi-chavchavadzes-projects.vercel.app/
 
 ### Deployment Steps
 
@@ -228,7 +228,7 @@ The application is deployed on **Vercel** at: [Your Vercel URL]
 ## 🔗 Links
 
 - **Repository**: https://github.com/n1kushach/imr-booking
-- **Live Demo**: [Vercel Deployment URL]
+- **Live Demo**: https://imr-booking-git-main-nikolozi-chavchavadzes-projects.vercel.app/
 - **Assignment**: Internal Meeting Room Booking System
 
 ## 📄 License
