@@ -1,5 +1,5 @@
 import { CalendarDays } from "lucide-react";
-import { ROOMS, CURRENT_USER } from "../../data/mockData";
+import { CURRENT_USER } from "../../data/mockData";
 import type { Booking } from "@/types/booking";
 import { useSnapshot } from "valtio";
 import { BookingsStore, BookingStoreActions } from "@/store/Bookings.store";
@@ -7,6 +7,7 @@ import BookingList from "@/components/bookings-view/BookingList";
 import { useMemo } from "react";
 import BookingFilter from "@/components/bookings-view/BookingFilter";
 import { toast } from "sonner";
+import { RoomsStore } from "@/store/Rooms.store";
 
 interface IBookingsView {
   isLoading: boolean;
@@ -16,6 +17,7 @@ interface IBookingsView {
 const BookingsView = (props: IBookingsView) => {
   const { isLoading, isError } = props;
   const bookingsSnapshot = useSnapshot(BookingsStore) as typeof BookingsStore;
+  const roomsSnapshot = useSnapshot(RoomsStore) as typeof RoomsStore;
 
   if (isError) {
     toast.error("Failed to fetch bookings");
@@ -37,7 +39,8 @@ const BookingsView = (props: IBookingsView) => {
           b.title
             .toLowerCase()
             .includes(bookingsSnapshot.filters.search.toLowerCase()) ||
-          ROOMS.find((r) => r.id === b.roomId)
+          roomsSnapshot.rooms
+            .find((r) => r.id === b.roomId)
             ?.name.toLowerCase()
             .includes(bookingsSnapshot.filters.search.toLowerCase()) ||
           b.organizer

@@ -1,5 +1,5 @@
-import { ROOMS } from "@/data/mockData";
 import { BookingsStore, BookingStoreActions } from "@/store/Bookings.store";
+import { RoomsStore } from "@/store/Rooms.store";
 import { CalendarDays } from "lucide-react";
 import { useLocation } from "react-router";
 
@@ -7,7 +7,8 @@ import { useSnapshot } from "valtio";
 
 const Header = () => {
   const location = useLocation();
-  const bookingsSnapshot = useSnapshot(BookingsStore);
+  const roomsSnapshot = useSnapshot(RoomsStore) as typeof RoomsStore;
+  const bookingsSnapshot = useSnapshot(BookingsStore) as typeof BookingsStore;
 
   return (
     <div className="border-b border-border bg-card/40">
@@ -21,7 +22,7 @@ const Header = () => {
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5 hidden md:block">
               {location.pathname == "/" &&
-                `${ROOMS.length} rooms available across ${[...new Set(ROOMS.map((r) => r.floor))].length} floors`}
+                `${roomsSnapshot.rooms.length} rooms available across ${[...new Set(roomsSnapshot.rooms.map((r) => r.floor))].length} floors`}
               {location.pathname == "/schedule" &&
                 "Daily and weekly overview of room reservations"}
               {location.pathname == "/bookings" &&
