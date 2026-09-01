@@ -100,9 +100,13 @@ export default function BookingForm() {
         notes: snapshot.editBooking.notes,
       });
     } else {
-      form.reset(bookingFormDefault);
+      console.log(snapshot.preselectedRoom, "Room");
+      form.reset({
+        ...bookingFormDefault,
+        roomId: snapshot.preselectedRoom ? snapshot.preselectedRoom.id : "",
+      });
     }
-  }, [snapshot.formOpen, snapshot.editBooking, form]);
+  }, [snapshot.formOpen, snapshot.editBooking, form, snapshot.preselectedRoom]);
 
   return (
     <Dialog
