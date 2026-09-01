@@ -95,7 +95,7 @@ const BookingForm = () => {
         startTime: snapshot.editBooking.startTime,
         endTime: snapshot.editBooking.endTime,
         attendees: [...snapshot.editBooking.attendees],
-        notes: snapshot.editBooking.notes,
+        notes: snapshot.editBooking.notes ? snapshot.editBooking.notes : "",
       });
     } else {
       form.reset({

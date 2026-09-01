@@ -2,8 +2,7 @@ import { CURRENT_USER } from "@/data/mockData";
 import { RoomsStore } from "@/store/Rooms.store";
 import type { Booking } from "@/types/booking";
 import type { Room } from "@/types/room";
-
-import { proxy } from "valtio";
+import { createPersistedStore } from "@/utils/valtio-persist";
 
 export const bookingFormDefault: BookingForm = {
   title: "",
@@ -25,7 +24,7 @@ export interface BookingForm {
   notes: string | undefined;
 }
 
-export const BookingsStore = proxy<{
+export const BookingsStore = createPersistedStore<{
   bookings: Booking[];
   formOpen: boolean;
   editBooking: Booking | undefined;
@@ -35,17 +34,20 @@ export const BookingsStore = proxy<{
     search: string;
     type: "all" | "mine" | "upcoming" | "past";
   };
-}>({
-  bookings: [],
-  formOpen: false,
-  editBooking: undefined,
-  preselectedRoom: undefined,
-  preselectedDate: undefined,
-  filters: {
-    search: "",
-    type: "upcoming",
+}>(
+  {
+    bookings: [],
+    formOpen: false,
+    editBooking: undefined,
+    preselectedRoom: undefined,
+    preselectedDate: undefined,
+    filters: {
+      search: "",
+      type: "upcoming",
+    },
   },
-});
+  "bookings",
+);
 
 export const BookingStoreActions = {
   openNew: (room?: Room, date?: string) => {
@@ -67,7 +69,6 @@ export const BookingStoreActions = {
     const startDateTime = new Date(`${form.date}T${form.startTime}`);
     const endDateTime = new Date(`${form.date}T${form.endTime}`);
     const now = new Date();
-    console.log("STORE BOOKINGS:", BookingsStore.bookings);
 
     if (startDateTime < now) {
       return {
@@ -187,9 +188,13 @@ export const BookingStoreActions = {
     // Prevent bookings in the past
     const startDateTime = new Date(`${form.date}T${form.startTime}`);
     const endDateTime = new Date(`${form.date}T${form.endTime}`);
-    const now = new Date();
 
-    if (startDateTime < now) {
+    // Only prevent moving/changing a booking into the past.
+    // Editing an already-past booking without changing its time is allowed.
+    const timeChanged =
+      form.date !== booking.date || form.startTime !== booking.startTime;
+
+    if (timeChanged && startDateTime < new Date()) {
       return {
         success: false as const,
         error: "You cannot move a booking to the past.",

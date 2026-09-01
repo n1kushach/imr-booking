@@ -46,7 +46,7 @@ export function useBookings() {
   });
 
   useEffect(() => {
-    if (query.data) {
+    if (query.data && BookingsStore.bookings.length === 0) {
       BookingsStore.bookings = query.data;
     }
   }, [query.data]);

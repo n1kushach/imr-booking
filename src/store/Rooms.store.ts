@@ -1,6 +1,5 @@
 import type { Room } from "@/types/room";
-
-import { proxy } from "valtio";
+import { createPersistedStore } from "@/utils/valtio-persist";
 
 export type capacityFilter = "any" | "small" | "medium" | "large";
 export interface BookingForm {
@@ -13,12 +12,15 @@ export interface BookingForm {
   notes: string;
 }
 
-export const RoomsStore = proxy<{
+export const RoomsStore = createPersistedStore<{
   rooms: Room[];
   search: string;
   capacityFilter: capacityFilter;
-}>({
-  rooms: [],
-  search: "",
-  capacityFilter: "any",
-});
+}>(
+  {
+    rooms: [],
+    search: "",
+    capacityFilter: "any",
+  },
+  "rooms",
+);

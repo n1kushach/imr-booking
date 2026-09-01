@@ -1,5 +1,4 @@
-import { Plus } from "lucide-react";
-import { Button } from "../ui/button";
+import { CalendarDays } from "lucide-react";
 import { ROOMS, CURRENT_USER } from "../../data/mockData";
 import type { Booking } from "@/types/booking";
 import { useSnapshot } from "valtio";
@@ -65,14 +64,13 @@ const BookingsView = (props: IBookingsView) => {
     <div className="space-y-5">
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <BookingFilter />
-        <Button
-          size="sm"
+        <button
           onClick={() => BookingStoreActions.openNew()}
-          className="gap-1.5 shrink-0"
+          className="flex items-center gap-2 px-4 text-[10px] py-2 bg-primary text-primary-foreground rounded-md whitespace-nowrap md:text-sm font-medium hover:bg-primary/90 transition-colors"
         >
-          <Plus className="w-4 h-4" />
+          <CalendarDays className="w-4 h-4" />
           New Booking
-        </Button>
+        </button>
       </div>
       <BookingList isLoading={isLoading} filtered={filtered} />
     </div>
