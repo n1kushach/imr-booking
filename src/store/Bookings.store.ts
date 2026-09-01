@@ -296,4 +296,12 @@ export const BookingStoreActions = {
       booking,
     };
   },
+  deleteBooking: (id: string) => {
+    const indexToDelete = BookingsStore.bookings.findIndex(
+      (item) => item.id == id,
+    );
+    if (indexToDelete !== -1) {
+      BookingsStore.bookings.splice(indexToDelete, 1);
+    }
+  },
 };

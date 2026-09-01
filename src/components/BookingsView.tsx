@@ -185,7 +185,6 @@ export default function BookingsView() {
                           onClick={() => {
                             BookingStoreActions.openEdit(booking);
                           }}
-                          // onClick={() => onEdit(booking)}
                         >
                           <Pencil className="w-3.5 h-3.5" />
                         </Button>
@@ -193,7 +192,9 @@ export default function BookingsView() {
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          // onClick={() => onCancel(booking.id)}
+                          onClick={() =>
+                            BookingStoreActions.deleteBooking(booking.id)
+                          }
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </Button>
