@@ -89,3 +89,8 @@ code,
   background-color: oklch(0.3 0.01 260);
   border-radius: 3px;
 }
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}

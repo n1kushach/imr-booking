@@ -7,6 +7,7 @@ import { useEffect } from "react";
 
 async function fetchRooms(): Promise<Room[]> {
   await new Promise((resolve) => setTimeout(resolve, 1000));
+
   const response = await fetch("/src/data/rooms.json");
   if (!response.ok) throw new Error("Failed to fetch rooms");
   return response.json();
@@ -17,6 +18,7 @@ export function useRooms() {
     queryKey: ["rooms"],
     queryFn: fetchRooms,
     staleTime: 1000 * 60 * 5,
+    retry: false,
   });
 
   useEffect(() => {
@@ -40,6 +42,7 @@ export function useBookings() {
     queryKey: ["bookings"],
     queryFn: fetchBookings,
     staleTime: 1000 * 60 * 5,
+    retry: false,
   });
 
   useEffect(() => {

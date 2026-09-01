@@ -1,7 +1,20 @@
+import { CURRENT_USER } from "@/data/mockData";
+import { RoomsStore } from "@/store/Rooms.store";
 import type { Booking } from "@/types/booking";
 import type { Room } from "@/types/room";
 
 import { proxy } from "valtio";
+
+export const bookingFormDefault: BookingForm = {
+  title: "",
+  roomId: "",
+  date: "",
+  startTime: "09:00",
+  endTime: "10:00",
+  attendees: [] as string[],
+  notes: "",
+};
+
 export interface BookingForm {
   title: string;
   roomId: string;
@@ -9,7 +22,7 @@ export interface BookingForm {
   startTime: string;
   endTime: string;
   attendees: string[];
-  notes: string;
+  notes: string | undefined;
 }
 
 export const BookingsStore = proxy<{
@@ -57,58 +70,230 @@ export const BookingStoreActions = {
   openEdit: (booking: Booking) => {
     BookingsStore.editBooking = booking;
 
-    BookingsStore.bookingForm.title = booking.title;
-    BookingsStore.bookingForm.roomId = booking.roomId;
-    BookingsStore.bookingForm.date = booking.date;
-    BookingsStore.bookingForm.startTime = booking.startTime;
-    BookingsStore.bookingForm.endTime = booking.endTime;
-    BookingsStore.bookingForm.attendees = [...booking.attendees];
-    BookingsStore.bookingForm.notes = booking.notes ?? "";
-
     BookingsStore.formOpen = true;
   },
   closeForm: () => {
     BookingsStore.formOpen = false;
   },
-  onSave: () => {
-    const form = BookingsStore.bookingForm;
+  createBooking: (form: BookingForm) => {
+    const room = RoomsStore.rooms.find((room) => room.id === form.roomId);
+    // Prevent bookings in the past
+    const startDateTime = new Date(`${form.date}T${form.startTime}`);
+    const endDateTime = new Date(`${form.date}T${form.endTime}`);
+    const now = new Date();
+    console.log("STORE BOOKINGS:", BookingsStore.bookings);
 
-    if (BookingsStore.editBooking) {
-      // Edit existing booking
-      const index = BookingsStore.bookings.findIndex(
-        (booking) => booking.id === BookingsStore.editBooking?.id,
-      );
-
-      if (index !== -1) {
-        BookingsStore.bookings[index] = {
-          ...BookingsStore.bookings[index],
-          title: form.title,
-          roomId: form.roomId,
-          date: form.date,
-          startTime: form.startTime,
-          endTime: form.endTime,
-          attendees: [...form.attendees],
-          notes: form.notes,
-        };
-      }
-    } else {
-      // Create new booking
-      const newBooking: Booking = {
-        id: `b${BookingsStore.bookings.length + 1}`,
-        title: form.title,
-        roomId: form.roomId,
-        organizer: "Current User",
-        attendees: [...form.attendees],
-        date: form.date,
-        startTime: form.startTime,
-        endTime: form.endTime,
-        notes: form.notes,
+    if (startDateTime < now) {
+      return {
+        success: false as const,
+        error: "You cannot create a booking in the past.",
       };
-
-      BookingsStore.bookings.push(newBooking);
     }
 
-    BookingsStore.formOpen = false;
-    BookingsStore.editBooking = undefined;
+    if (endDateTime <= startDateTime) {
+      return {
+        success: false as const,
+        error: "End time must be after start time.",
+      };
+    }
+
+    // Room must exist
+    if (!room) {
+      return {
+        success: false as const,
+        error: "Selected room does not exist.",
+      };
+    }
+
+    // Check room availability
+    const roomConflict = BookingsStore.bookings.some((existingBooking) => {
+      if (
+        existingBooking.roomId !== form.roomId ||
+        existingBooking.date !== form.date
+      ) {
+        return false;
+      }
+
+      return (
+        existingBooking.startTime < form.endTime &&
+        existingBooking.endTime > form.startTime
+      );
+    });
+
+    if (roomConflict) {
+      return {
+        success: false as const,
+        error: "This room is already booked during this time.",
+      };
+    }
+
+    // Check room capacity
+    const totalPeople = 1 + form.attendees.length;
+
+    if (totalPeople > room.capacity) {
+      return {
+        success: false as const,
+        error: `This room can accommodate a maximum of ${room.capacity} people.`,
+      };
+    }
+
+    // Check attendee availability
+    const conflictingAttendees = form.attendees.filter((attendee) =>
+      BookingsStore.bookings.some((existingBooking) => {
+        if (existingBooking.date !== form.date) {
+          return false;
+        }
+
+        const attendeeAlreadyBooked =
+          existingBooking.organizer === attendee ||
+          existingBooking.attendees.includes(attendee);
+
+        if (!attendeeAlreadyBooked) {
+          return false;
+        }
+
+        return (
+          existingBooking.startTime < form.endTime &&
+          existingBooking.endTime > form.startTime
+        );
+      }),
+    );
+
+    if (conflictingAttendees.length > 0) {
+      return {
+        success: false as const,
+        error: `The following attendee(s) are already booked: ${conflictingAttendees.join(
+          ", ",
+        )}`,
+      };
+    }
+
+    // Everything is valid — create the booking
+    const booking: Booking = {
+      id: `b${Date.now()}`,
+      roomId: form.roomId,
+      title: form.title,
+      organizer: CURRENT_USER,
+      attendees: form.attendees,
+      date: form.date,
+      startTime: form.startTime,
+      endTime: form.endTime,
+      notes: form.notes || undefined,
+    };
+
+    BookingsStore.bookings.push(booking);
+
+    return {
+      success: true as const,
+      booking,
+    };
+  },
+  editBooking: (id: string, form: BookingForm) => {
+    const booking = BookingsStore.bookings.find((booking) => booking.id === id);
+
+    if (!booking) {
+      return {
+        success: false as const,
+        error: "Booking not found.",
+      };
+    }
+
+    // Prevent bookings in the past
+    const startDateTime = new Date(`${form.date}T${form.startTime}`);
+    const endDateTime = new Date(`${form.date}T${form.endTime}`);
+    const now = new Date();
+
+    if (startDateTime < now) {
+      return {
+        success: false as const,
+        error: "You cannot move a booking to the past.",
+      };
+    }
+
+    if (endDateTime <= startDateTime) {
+      return {
+        success: false as const,
+        error: "End time must be after start time.",
+      };
+    }
+
+    const room = RoomsStore.rooms.find((room) => room.id === form.roomId);
+    if (!room) {
+      return {
+        success: false as const,
+        error: "Selected room does not exist.",
+      };
+    }
+
+    // Check room availability (exclude current booking)
+    const roomConflict = BookingsStore.bookings.some((existingBooking) => {
+      if (existingBooking.id === id) return false; // Skip self
+      if (
+        existingBooking.roomId !== form.roomId ||
+        existingBooking.date !== form.date
+      ) {
+        return false;
+      }
+      return (
+        existingBooking.startTime < form.endTime &&
+        existingBooking.endTime > form.startTime
+      );
+    });
+
+    if (roomConflict) {
+      return {
+        success: false as const,
+        error: "This room is already booked during this time.",
+      };
+    }
+
+    // Check room capacity
+    const totalPeople = 1 + form.attendees.length;
+    if (totalPeople > room.capacity) {
+      return {
+        success: false as const,
+        error: `This room can accommodate a maximum of ${room.capacity} people.`,
+      };
+    }
+
+    // Check attendee availability (exclude current booking)
+    const conflictingAttendees = form.attendees.filter((attendee) =>
+      BookingsStore.bookings.some((existingBooking) => {
+        if (existingBooking.id === id) return false; // Skip self
+        if (existingBooking.date !== form.date) return false;
+
+        const attendeeAlreadyBooked =
+          existingBooking.organizer === attendee ||
+          existingBooking.attendees.includes(attendee);
+
+        if (!attendeeAlreadyBooked) return false;
+
+        return (
+          existingBooking.startTime < form.endTime &&
+          existingBooking.endTime > form.startTime
+        );
+      }),
+    );
+
+    if (conflictingAttendees.length > 0) {
+      return {
+        success: false as const,
+        error: `The following attendee(s) are already booked: ${conflictingAttendees.join(", ")}`,
+      };
+    }
+
+    // All validations passed — update the booking
+    booking.title = form.title;
+    booking.roomId = form.roomId;
+    booking.date = form.date;
+    booking.startTime = form.startTime;
+    booking.endTime = form.endTime;
+    booking.attendees = [...form.attendees];
+    booking.notes = form.notes;
+
+    return {
+      success: true as const,
+      booking,
+    };
   },
 };

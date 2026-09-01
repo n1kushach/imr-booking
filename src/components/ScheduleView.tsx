@@ -42,16 +42,11 @@ const fmtLabel = (d: Date) =>
   });
 
 interface ScheduleViewProps {
-  bookings: Booking[];
   onNew: (date?: string) => void;
   onEdit: (booking: Booking) => void;
 }
 
-export default function ScheduleView({
-  bookings,
-  onNew,
-  onEdit,
-}: ScheduleViewProps) {
+export default function ScheduleView({ onNew, onEdit }: ScheduleViewProps) {
   const [mode, setMode] = useState<ScheduleMode>("day");
   const [baseDate, setBaseDate] = useState(new Date());
 

@@ -1,7 +1,8 @@
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
+import { useForm } from "@tanstack/react-form";
+
 import {
   Select,
   SelectContent,
@@ -17,50 +18,91 @@ import {
   DialogFooter,
 } from "./ui/dialog";
 
-import { ROOMS, EMPLOYEES, CURRENT_USER } from "../data/mockData";
+import { ROOMS, EMPLOYEES, CURRENT_USER, TIMES } from "../data/mockData";
 
 import { useSnapshot } from "valtio";
-import { BookingsStore, BookingStoreActions } from "@/store/Bookings.store";
-
-const TIMES = Array.from({ length: 24 }, (_, i) => {
-  const h = String(i).padStart(2, "0");
-
-  return [`${h}:00`, `${h}:30`];
-}).flat();
+import {
+  bookingFormDefault,
+  BookingsStore,
+  BookingStoreActions,
+} from "@/store/Bookings.store";
+import { bookingSchema } from "@/schemas/booking.schema";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { toast } from "sonner";
+import { useEffect } from "react";
 
 export default function BookingForm() {
+  const form = useForm({
+    defaultValues: bookingFormDefault,
+    validators: {
+      onChange: bookingSchema,
+      onSubmit: bookingSchema,
+    },
+    onSubmit: async ({ value }) => {
+      if (isEditing && snapshot.editBooking?.id) {
+        const result = BookingStoreActions.editBooking(
+          snapshot.editBooking.id,
+          value,
+        );
+
+        if (!result.success) {
+          toast.error("Booking update failed", {
+            description: result.error,
+          });
+          return;
+        }
+
+        toast.success("Booking updated", {
+          description: `Your booking "${value.title}" was updated successfully!`,
+        });
+      } else {
+        const result = BookingStoreActions.createBooking(value);
+
+        if (!result.success) {
+          toast.error("Booking failed", {
+            description: result.error,
+          });
+          return;
+        }
+
+        toast.success("Booking created", {
+          description: `Your booking for ${value.title} was created successfully!`,
+        });
+      }
+
+      BookingStoreActions.closeForm();
+      form.reset(bookingFormDefault);
+    },
+  });
+
   const snapshot = useSnapshot(BookingsStore) as typeof BookingsStore;
-
-  const form = snapshot.bookingForm;
-
   const today = new Date().toISOString().split("T")[0];
-
   const isEditing = !!snapshot.editBooking?.id;
 
-  const toggleAttendee = (name: string) => {
-    const attendees = BookingsStore.bookingForm.attendees;
+  console.log(snapshot.editBooking, "isEditing");
 
-    // eslint-disable-next-line react-hooks/immutability
-    BookingsStore.bookingForm.attendees = attendees.includes(name)
-      ? attendees.filter((attendee) => attendee !== name)
-      : [...attendees, name];
-  };
+  useEffect(() => {
+    if (!snapshot.formOpen) return;
 
-  const handleSave = () => {
-    if (
-      !form.title ||
-      !form.roomId ||
-      !form.date ||
-      !form.startTime ||
-      !form.endTime
-    ) {
-      return;
+    if (snapshot.editBooking) {
+      form.reset({
+        title: snapshot.editBooking.title,
+        roomId: snapshot.editBooking.roomId,
+        date: snapshot.editBooking.date,
+        startTime: snapshot.editBooking.startTime,
+        endTime: snapshot.editBooking.endTime,
+        attendees: [...snapshot.editBooking.attendees],
+        notes: snapshot.editBooking.notes,
+      });
+    } else {
+      form.reset(bookingFormDefault);
     }
-
-    BookingStoreActions.onSave();
-
-    BookingStoreActions.closeForm();
-  };
+  }, [snapshot.formOpen, snapshot.editBooking, form]);
 
   return (
     <Dialog
@@ -68,173 +110,298 @@ export default function BookingForm() {
       onOpenChange={(open) => {
         if (!open) {
           BookingStoreActions.closeForm();
+          form.reset();
         }
       }}
     >
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto bg-card rounded-md">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? "Edit Booking" : "New Booking"}
           </DialogTitle>
         </DialogHeader>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
+        >
+          <div className="grid gap-4 py-2">
+            <FieldGroup>
+              <div className="grid gap-1.5">
+                <form.Field
+                  name="title"
+                  children={(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid}>
+                        <FieldLabel htmlFor={field.name}>
+                          Meeting Title
+                        </FieldLabel>
+                        <Input
+                          className="bg-card border border-slate-500!"
+                          id={field.name}
+                          name={field.name}
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          placeholder="e.g. Sprint Planning"
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          aria-invalid={isInvalid}
+                        />
+                        {isInvalid && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </Field>
+                    );
+                  }}
+                />
+              </div>
 
-        <div className="grid gap-4 py-2">
-          {/* Meeting Title */}
-          <div className="grid gap-1.5">
-            <Label htmlFor="title">Meeting Title</Label>
+              <div className="grid gap-1.5">
+                <form.Field
+                  name="roomId"
+                  children={(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid}>
+                        <FieldLabel>Room</FieldLabel>
+                        <Select
+                          name={field.name}
+                          value={field.state.value}
+                          onValueChange={field.handleChange}
+                        >
+                          <SelectTrigger
+                            className="bg-card border border-slate-500!"
+                            aria-invalid={isInvalid}
+                          >
+                            <SelectValue placeholder="Select a room" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-black">
+                            {ROOMS.map((room) => (
+                              <SelectItem key={room.id} value={room.id}>
+                                {room.name} — Floor {room.floor},{" "}
+                                {room.capacity} seats
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {isInvalid && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </Field>
+                    );
+                  }}
+                ></form.Field>
+              </div>
 
-            <Input
-              id="title"
-              placeholder="e.g. Sprint Planning"
-              value={form.title}
-              onChange={(e) => {
-                BookingsStore.bookingForm.title = e.target.value;
-              }}
-            />
+              <div className="grid gap-1.5">
+                <form.Field
+                  name="date"
+                  children={(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid}>
+                        <FieldLabel htmlFor={field.name}>Date</FieldLabel>
+                        <Input
+                          className="bg-card border border-slate-500!"
+                          id={field.name}
+                          name={field.name}
+                          value={field.state.value}
+                          type="date"
+                          onClick={(e) => {
+                            e.currentTarget.showPicker?.();
+                          }}
+                          min={today}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          aria-invalid={isInvalid}
+                        />
+                        {isInvalid && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </Field>
+                    );
+                  }}
+                ></form.Field>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-1.5">
+                  <form.Field
+                    name="startTime"
+                    children={(field) => {
+                      const isInvalid =
+                        field.state.meta.isTouched && !field.state.meta.isValid;
+                      return (
+                        <Field data-invalid={isInvalid}>
+                          <FieldLabel>Start Time</FieldLabel>
+                          <Select
+                            name={field.name}
+                            value={field.state.value}
+                            onValueChange={field.handleChange}
+                          >
+                            <SelectTrigger
+                              className="bg-card border border-slate-500!"
+                              aria-invalid={isInvalid}
+                            >
+                              <SelectValue />
+                            </SelectTrigger>
+
+                            <SelectContent className="max-h-48 bg-black">
+                              {TIMES.map((time) => (
+                                <SelectItem key={time} value={time}>
+                                  {time}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {isInvalid && (
+                            <FieldError errors={field.state.meta.errors} />
+                          )}
+                        </Field>
+                      );
+                    }}
+                  ></form.Field>
+                </div>
+
+                <div className="grid gap-1.5">
+                  <form.Field
+                    name="endTime"
+                    children={(field) => {
+                      const isInvalid =
+                        field.state.meta.isTouched && !field.state.meta.isValid;
+                      const startTime = form.getFieldValue("startTime");
+                      return (
+                        <Field data-invalid={isInvalid}>
+                          <FieldLabel>End Time</FieldLabel>
+                          <Select
+                            name={field.name}
+                            value={field.state.value}
+                            onValueChange={field.handleChange}
+                          >
+                            <SelectTrigger
+                              className="bg-card border border-slate-500!"
+                              aria-invalid={isInvalid}
+                            >
+                              <SelectValue />
+                            </SelectTrigger>
+
+                            <SelectContent className="max-h-48 bg-black">
+                              {TIMES.filter((time) => time > startTime).map(
+                                (time) => (
+                                  <SelectItem key={time} value={time}>
+                                    {time}
+                                  </SelectItem>
+                                ),
+                              )}
+                            </SelectContent>
+                          </Select>
+                          {isInvalid && (
+                            <FieldError errors={field.state.meta.errors} />
+                          )}
+                        </Field>
+                      );
+                    }}
+                  ></form.Field>
+                </div>
+              </div>
+
+              <form.Field
+                name="attendees"
+                children={(field) => (
+                  <div className="grid gap-1.5">
+                    <FieldLabel>Attendees</FieldLabel>
+
+                    <div className="flex flex-wrap gap-1.5">
+                      {EMPLOYEES.filter(
+                        (employee) => employee !== CURRENT_USER,
+                      ).map((employee) => {
+                        const selected = field.state.value.includes(employee);
+
+                        return (
+                          <button
+                            key={employee}
+                            type="button"
+                            onClick={() => {
+                              field.handleChange((current) =>
+                                current.includes(employee)
+                                  ? current.filter(
+                                      (attendee) => attendee !== employee,
+                                    )
+                                  : [...current, employee],
+                              );
+                            }}
+                            className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
+                              selected
+                                ? "bg-primary/20 border-primary/40 text-primary"
+                                : "border-border text-muted-foreground hover:border-primary/30 hover:text-foreground"
+                            }`}
+                          >
+                            {employee}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {field.state.meta.isTouched &&
+                      !field.state.meta.isValid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                  </div>
+                )}
+              />
+
+              <div className="grid gap-1.5">
+                <form.Field
+                  name="notes"
+                  children={(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid}>
+                        <FieldLabel htmlFor={field.name}>
+                          Notes (optional)
+                        </FieldLabel>
+
+                        <Textarea
+                          className="bg-card border border-slate-500!"
+                          id={field.name}
+                          placeholder="Any additional details..."
+                          value={field.state.value}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          aria-invalid={isInvalid}
+                          rows={2}
+                        />
+                        {isInvalid && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </Field>
+                    );
+                  }}
+                ></form.Field>
+              </div>
+            </FieldGroup>
           </div>
-
-          {/* Room */}
-          <div className="grid gap-1.5">
-            <Label>Room</Label>
-
-            <Select
-              value={form.roomId}
-              onValueChange={(value) => {
-                BookingsStore.bookingForm.roomId = value;
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a room" />
-              </SelectTrigger>
-
-              <SelectContent>
-                {ROOMS.map((room) => (
-                  <SelectItem key={room.id} value={room.id}>
-                    {room.name} — Floor {room.floor}, {room.capacity} seats
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Date */}
-          <div className="grid gap-1.5">
-            <Label htmlFor="date">Date</Label>
-
-            <Input
-              id="date"
-              type="date"
-              value={form.date}
-              min={today}
-              onChange={(e) => {
-                BookingsStore.bookingForm.date = e.target.value;
-              }}
-            />
-          </div>
-
-          {/* Time */}
-          <div className="grid grid-cols-2 gap-3">
-            {/* Start Time */}
-            <div className="grid gap-1.5">
-              <Label>Start Time</Label>
-
-              <Select
-                value={form.startTime}
-                onValueChange={(value) => {
-                  BookingsStore.bookingForm.startTime = value;
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-
-                <SelectContent className="max-h-48">
-                  {TIMES.map((time) => (
-                    <SelectItem key={time} value={time}>
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* End Time */}
-            <div className="grid gap-1.5">
-              <Label>End Time</Label>
-
-              <Select
-                value={form.endTime}
-                onValueChange={(value) => {
-                  BookingsStore.bookingForm.endTime = value;
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-
-                <SelectContent className="max-h-48">
-                  {TIMES.filter((time) => time > form.startTime).map((time) => (
-                    <SelectItem key={time} value={time}>
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Attendees */}
-          <div className="grid gap-1.5">
-            <Label>Attendees</Label>
-
-            <div className="flex flex-wrap gap-1.5">
-              {EMPLOYEES.filter((employee) => employee !== CURRENT_USER).map(
-                (employee) => {
-                  const selected = form.attendees.includes(employee);
-
-                  return (
-                    <button
-                      key={employee}
-                      type="button"
-                      onClick={() => toggleAttendee(employee)}
-                      className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
-                        selected
-                          ? "bg-primary/20 border-primary/40 text-primary"
-                          : "border-border text-muted-foreground hover:border-primary/30 hover:text-foreground"
-                      }`}
-                    >
-                      {employee}
-                    </button>
-                  );
-                },
-              )}
-            </div>
-          </div>
-
-          {/* Notes */}
-          <div className="grid gap-1.5">
-            <Label htmlFor="notes">Notes (optional)</Label>
-
-            <Textarea
-              id="notes"
-              placeholder="Any additional details..."
-              value={form.notes}
-              onChange={(e) => {
-                BookingsStore.bookingForm.notes = e.target.value;
-              }}
-              rows={2}
-            />
-          </div>
-        </div>
-
+        </form>
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={BookingStoreActions.closeForm}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              form.reset();
+              BookingsStore.editBooking = undefined;
+              BookingStoreActions.closeForm();
+            }}
+          >
             Cancel
           </Button>
 
           <Button
-            onClick={handleSave}
-            disabled={!form.title || !form.roomId || !form.date}
+            type="submit"
+            onClick={() => {
+              form.handleSubmit();
+            }}
           >
             {isEditing ? "Save Changes" : "Book Room"}
           </Button>

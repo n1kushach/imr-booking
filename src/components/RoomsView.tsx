@@ -4,17 +4,24 @@ import { RoomsStore } from "@/store/Rooms.store";
 import CRoom from "@/components/room/CRoom";
 import CRoomFilter from "@/components/room/CRoomFilter";
 import CRoomSkeleton from "@/components/room/CRoom.skeleton";
-import BookingForm from "@/components/BookingForm";
 import { BookingsStore } from "@/store/Bookings.store";
 
 interface IRoomsView {
   onBook: (room: TRoom) => void;
   isRoomsLoading: boolean;
   isBookingsLoading: boolean;
+  isBookingsError: boolean;
+  isRoomsError: boolean;
 }
 
 export default function RoomsView(props: IRoomsView) {
-  const { onBook, isRoomsLoading, isBookingsLoading } = props;
+  const {
+    onBook,
+    isRoomsLoading,
+    isBookingsLoading,
+    isBookingsError,
+    isRoomsError,
+  } = props;
   const bookingsSnapshot = useSnapshot(BookingsStore) as typeof BookingsStore;
   const roomsSnapshot = useSnapshot(RoomsStore) as typeof RoomsStore;
   const today = new Date().toISOString().split("T")[0];
@@ -75,12 +82,13 @@ export default function RoomsView(props: IRoomsView) {
 
       {filtered.length === 0 &&
         isRoomsLoading !== true &&
-        isBookingsLoading !== true && (
+        isBookingsLoading !== true &&
+        isRoomsError == false &&
+        isBookingsError == false && (
           <div className="text-center py-16 text-muted-foreground">
             <p className="text-sm">No rooms match your filters.</p>
           </div>
         )}
-      <BookingForm />
     </div>
   );
 }

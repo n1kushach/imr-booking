@@ -1,6 +1,12 @@
 import type { Booking } from "@/types/booking";
 import type { Room } from "@/types/room";
 
+export const TIMES = Array.from({ length: 24 }, (_, i) => {
+  const h = String(i).padStart(2, "0");
+
+  return [`${h}:00`, `${h}:30`];
+}).flat();
+
 export const ROOMS: Room[] = [
   {
     id: "r1",

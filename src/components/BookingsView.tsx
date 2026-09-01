@@ -15,20 +15,12 @@ import { Input } from "./ui/input";
 import { ROOMS, CURRENT_USER } from "../data/mockData";
 import type { Booking } from "@/types/booking";
 import { useSnapshot } from "valtio";
-import { BookingsStore } from "@/store/Bookings.store";
+import { BookingsStore, BookingStoreActions } from "@/store/Bookings.store";
+import { RoomsStore } from "@/store/Rooms.store";
 
-interface BookingsViewProps {
-  onEdit: (booking: Booking) => void;
-  onCancel: (id: string) => void;
-  onNew: () => void;
-}
-
-export default function BookingsView({
-  onEdit,
-  onCancel,
-  onNew,
-}: BookingsViewProps) {
+export default function BookingsView() {
   const bookingsSnapshot = useSnapshot(BookingsStore) as typeof BookingsStore;
+  const roomsSnapshot = useSnapshot(RoomsStore) as typeof RoomsStore;
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "mine" | "upcoming" | "past">(
     "upcoming",
@@ -75,7 +67,8 @@ export default function BookingsView({
     });
   };
 
-  const getRoom = (roomId: string) => ROOMS.find((r) => r.id === roomId);
+  const getRoom = (roomId: string) =>
+    roomsSnapshot.rooms.find((r) => r.id === roomId);
 
   return (
     <div className="space-y-5">
@@ -106,7 +99,11 @@ export default function BookingsView({
             ))}
           </div>
         </div>
-        <Button size="sm" onClick={onNew} className="gap-1.5 shrink-0">
+        <Button
+          size="sm"
+          onClick={() => BookingStoreActions.openNew()}
+          className="gap-1.5 shrink-0"
+        >
           <Plus className="w-4 h-4" />
           New Booking
         </Button>
@@ -185,7 +182,10 @@ export default function BookingsView({
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7"
-                          onClick={() => onEdit(booking)}
+                          onClick={() => {
+                            BookingStoreActions.openEdit(booking);
+                          }}
+                          // onClick={() => onEdit(booking)}
                         >
                           <Pencil className="w-3.5 h-3.5" />
                         </Button>
@@ -193,7 +193,7 @@ export default function BookingsView({
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => onCancel(booking.id)}
+                          // onClick={() => onCancel(booking.id)}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </Button>
