@@ -18,7 +18,7 @@ import {
   DialogFooter,
 } from "../ui/dialog";
 
-import { ROOMS, EMPLOYEES, CURRENT_USER, TIMES } from "../../data/mockData";
+import { EMPLOYEES, CURRENT_USER, TIMES } from "../../data/mockData";
 
 import { useSnapshot } from "valtio";
 import {
@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/field";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { RoomsStore } from "@/store/Rooms.store";
 
 const BookingForm = () => {
   const form = useForm({
@@ -81,6 +82,7 @@ const BookingForm = () => {
   });
 
   const snapshot = useSnapshot(BookingsStore) as typeof BookingsStore;
+  const roomsSnapshot = useSnapshot(RoomsStore) as typeof RoomsStore;
   const today = new Date().toISOString().split("T")[0];
   const isEditing = !!snapshot.editBooking?.id;
 
@@ -186,7 +188,7 @@ const BookingForm = () => {
                             <SelectValue placeholder="Select a room" />
                           </SelectTrigger>
                           <SelectContent className="bg-black">
-                            {ROOMS.map((room) => (
+                            {roomsSnapshot.rooms.map((room) => (
                               <SelectItem key={room.id} value={room.id}>
                                 {room.name} — Floor {room.floor},{" "}
                                 {room.capacity} seats
