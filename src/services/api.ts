@@ -8,7 +8,7 @@ import { useEffect } from "react";
 async function fetchRooms(): Promise<Room[]> {
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  const response = await fetch("/src/data/rooms.json");
+  const response = await fetch("/data/rooms.json");
   if (!response.ok) throw new Error("Failed to fetch rooms");
   return response.json();
 }
@@ -32,7 +32,7 @@ export function useRooms() {
 
 async function fetchBookings(): Promise<Booking[]> {
   await new Promise((resolve) => setTimeout(resolve, 1000));
-  const response = await fetch("/src/data/bookings.json");
+  const response = await fetch("/data/bookings.json");
   if (!response.ok) throw new Error("Failed to fetch bookings");
   return response.json();
 }
