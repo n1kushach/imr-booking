@@ -156,7 +156,7 @@ export const BookingStoreActions = {
 
     // Everything is valid — create the booking
     const booking: Booking = {
-      id: `b${Date.now()}`,
+      id: `b${BookingsStore.bookings.length + 1}`,
       roomId: form.roomId,
       title: form.title,
       organizer: CURRENT_USER,

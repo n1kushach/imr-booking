@@ -8,6 +8,6 @@ const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
-    <RouterProvider router={router} />,
+    <RouterProvider router={router} />
   </QueryClientProvider>,
 );

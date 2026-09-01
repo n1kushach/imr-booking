@@ -10,7 +10,7 @@ interface IRoomsView {
   isError: boolean;
 }
 
-export default function RoomsView(props: IRoomsView) {
+const RoomsView = (props: IRoomsView) => {
   const { isLoading, isError } = props;
   const bookingsSnapshot = useSnapshot(BookingsStore) as typeof BookingsStore;
   const roomsSnapshot = useSnapshot(RoomsStore) as typeof RoomsStore;
@@ -76,4 +76,6 @@ export default function RoomsView(props: IRoomsView) {
       )}
     </div>
   );
-}
+};
+
+export default RoomsView;

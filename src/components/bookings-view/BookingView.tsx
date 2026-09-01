@@ -14,7 +14,7 @@ interface IBookingsView {
   isError: boolean;
 }
 
-export default function BookingsView(props: IBookingsView) {
+const BookingsView = (props: IBookingsView) => {
   const { isLoading, isError } = props;
   const bookingsSnapshot = useSnapshot(BookingsStore) as typeof BookingsStore;
 
@@ -77,4 +77,6 @@ export default function BookingsView(props: IBookingsView) {
       <BookingList isLoading={isLoading} filtered={filtered} />
     </div>
   );
-}
+};
+
+export default BookingsView;

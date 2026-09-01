@@ -2,7 +2,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function BookingListSkeleton() {
+const BookingListSkeleton = () => {
   return (
     <Card className="opacity-60">
       <CardContent className="p-4">
@@ -42,4 +42,6 @@ export default function BookingListSkeleton() {
       </CardContent>
     </Card>
   );
-}
+};
+
+export default BookingListSkeleton;

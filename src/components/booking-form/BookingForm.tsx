@@ -36,7 +36,7 @@ import {
 import { toast } from "sonner";
 import { useEffect } from "react";
 
-export default function BookingForm() {
+const BookingForm = () => {
   const form = useForm({
     defaultValues: bookingFormDefault,
     validators: {
@@ -84,8 +84,6 @@ export default function BookingForm() {
   const today = new Date().toISOString().split("T")[0];
   const isEditing = !!snapshot.editBooking?.id;
 
-  console.log(snapshot.editBooking, "isEditing");
-
   useEffect(() => {
     if (!snapshot.formOpen) return;
 
@@ -100,13 +98,19 @@ export default function BookingForm() {
         notes: snapshot.editBooking.notes,
       });
     } else {
-      console.log(snapshot.preselectedRoom, "Room");
       form.reset({
         ...bookingFormDefault,
         roomId: snapshot.preselectedRoom ? snapshot.preselectedRoom.id : "",
+        date: snapshot.preselectedDate ? snapshot.preselectedDate : "",
       });
     }
-  }, [snapshot.formOpen, snapshot.editBooking, form, snapshot.preselectedRoom]);
+  }, [
+    snapshot.formOpen,
+    snapshot.editBooking,
+    form,
+    snapshot.preselectedRoom,
+    snapshot.preselectedDate,
+  ]);
 
   return (
     <Dialog
@@ -413,4 +417,6 @@ export default function BookingForm() {
       </DialogContent>
     </Dialog>
   );
-}
+};
+
+export default BookingForm;
