@@ -7,6 +7,7 @@ import { BookingsStore, BookingStoreActions } from "@/store/Bookings.store";
 import BookingList from "@/components/bookings-view/BookingList";
 import { useMemo } from "react";
 import BookingFilter from "@/components/bookings-view/BookingFilter";
+import { toast } from "sonner";
 
 interface IBookingsView {
   isLoading: boolean;
@@ -16,6 +17,10 @@ interface IBookingsView {
 export default function BookingsView(props: IBookingsView) {
   const { isLoading, isError } = props;
   const bookingsSnapshot = useSnapshot(BookingsStore) as typeof BookingsStore;
+
+  if (isError) {
+    toast.error("Failed to fetch bookings");
+  }
 
   const filtered = useMemo(() => {
     const now = new Date();
@@ -69,7 +74,7 @@ export default function BookingsView(props: IBookingsView) {
           New Booking
         </Button>
       </div>
-      <BookingList filtered={filtered} />
+      <BookingList isLoading={isLoading} filtered={filtered} />
     </div>
   );
 }
