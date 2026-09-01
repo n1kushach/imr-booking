@@ -1,4 +1,4 @@
-import RoomsView from "@/components/RoomsView";
+import RoomsView from "@/components/rooms-view/RoomsView";
 import { useRooms } from "@/services/api";
 import { toast } from "sonner";
 

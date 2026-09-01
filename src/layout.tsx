@@ -1,4 +1,4 @@
-import BookingForm from "@/components/BookingForm";
+import BookingForm from "@/components/booking-form/BookingForm";
 import Header from "@/components/header/Header";
 import Navigation from "@/components/navigation/Navigation";
 import { Toaster } from "@/components/ui/sonner";

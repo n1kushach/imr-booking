@@ -1,11 +1,11 @@
-import BookingsView from "@/components/BookingsView";
+import BookingView from "@/components/bookings-view/BookingView";
 import { useBookings } from "@/services/api";
 
 const BookingsPage = () => {
   const { isLoading: isBookingsLoading, isError: isBookingsError } =
     useBookings();
   return (
-    <BookingsView isLoading={isBookingsLoading} isError={isBookingsError} />
+    <BookingView isLoading={isBookingsLoading} isError={isBookingsError} />
   );
 };
 

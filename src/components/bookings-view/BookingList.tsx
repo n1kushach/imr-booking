@@ -1,4 +1,4 @@
-import BookingCard from "@/components/booking-card/BookingCard";
+import BookingCard from "@/components/bookings-view/BookingCard";
 import type { Booking } from "@/types/booking";
 import { Calendar } from "lucide-react";
 

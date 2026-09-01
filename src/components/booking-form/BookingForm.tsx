@@ -1,6 +1,6 @@
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
 import { useForm } from "@tanstack/react-form";
 
 import {
@@ -9,16 +9,16 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "../ui/select";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "./ui/dialog";
+} from "../ui/dialog";
 
-import { ROOMS, EMPLOYEES, CURRENT_USER, TIMES } from "../data/mockData";
+import { ROOMS, EMPLOYEES, CURRENT_USER, TIMES } from "../../data/mockData";
 
 import { useSnapshot } from "valtio";
 import {
