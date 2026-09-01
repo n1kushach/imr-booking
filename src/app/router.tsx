@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router";
-import App from "../App";
 import Layout from "@/layout";
+import RoomsPage from "@/pages/RoomsPage";
+import BookingsPage from "@/pages/BookingsPage";
 
 export const router = createBrowserRouter([
   {
@@ -9,7 +10,11 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <App />,
+        element: <RoomsPage />,
+      },
+      {
+        path: "/bookings",
+        element: <BookingsPage />,
       },
     ],
   },

@@ -1,4 +1,3 @@
-import type { Room as TRoom } from "@/types/room";
 import { useSnapshot } from "valtio";
 import { RoomsStore } from "@/store/Rooms.store";
 import CRoom from "@/components/room/CRoom";
@@ -7,21 +6,12 @@ import CRoomSkeleton from "@/components/room/CRoom.skeleton";
 import { BookingsStore } from "@/store/Bookings.store";
 
 interface IRoomsView {
-  onBook: (room: TRoom) => void;
-  isRoomsLoading: boolean;
-  isBookingsLoading: boolean;
-  isBookingsError: boolean;
-  isRoomsError: boolean;
+  isLoading: boolean;
+  isError: boolean;
 }
 
 export default function RoomsView(props: IRoomsView) {
-  const {
-    onBook,
-    isRoomsLoading,
-    isBookingsLoading,
-    isBookingsError,
-    isRoomsError,
-  } = props;
+  const { isLoading, isError } = props;
   const bookingsSnapshot = useSnapshot(BookingsStore) as typeof BookingsStore;
   const roomsSnapshot = useSnapshot(RoomsStore) as typeof RoomsStore;
   const today = new Date().toISOString().split("T")[0];
@@ -57,7 +47,7 @@ export default function RoomsView(props: IRoomsView) {
       <CRoomFilter />
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 h-full">
-        {isRoomsLoading || isBookingsLoading
+        {isLoading
           ? Array.from({ length: 6 }).map((_, index) => (
               <CRoomSkeleton key={index} />
             ))
@@ -70,7 +60,6 @@ export default function RoomsView(props: IRoomsView) {
 
               return (
                 <CRoom
-                  onBook={onBook}
                   key={room.id}
                   room={room}
                   busy={busy}
@@ -80,15 +69,11 @@ export default function RoomsView(props: IRoomsView) {
             })}
       </div>
 
-      {filtered.length === 0 &&
-        isRoomsLoading !== true &&
-        isBookingsLoading !== true &&
-        isRoomsError == false &&
-        isBookingsError == false && (
-          <div className="text-center py-16 text-muted-foreground">
-            <p className="text-sm">No rooms match your filters.</p>
-          </div>
-        )}
+      {filtered.length === 0 && isLoading !== true && isError == false && (
+        <div className="text-center py-16 text-muted-foreground">
+          <p className="text-sm">No rooms match your filters.</p>
+        </div>
+      )}
     </div>
   );
 }

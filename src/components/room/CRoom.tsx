@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { BookingStoreActions } from "@/store/Bookings.store";
 import type { Booking } from "@/types/booking";
 import type { Room } from "@/types/room";
 import {
@@ -25,11 +26,10 @@ interface IRoom {
   room: Room;
   busy: boolean;
   todayBookings: Booking[];
-  onBook: (room: Room) => void;
 }
 
 const CRoom = (props: IRoom) => {
-  const { room, busy, todayBookings, onBook } = props;
+  const { room, busy, todayBookings } = props;
   return (
     <Card
       key={room.id}
@@ -81,17 +81,19 @@ const CRoom = (props: IRoom) => {
           </div>
         </div>
         <div className="bottom flex flex-col gap-2">
-          {todayBookings.length > 0 && (
-            <div className="text-xs text-muted-foreground border-t border-border pt-2">
-              <span className="font-medium text-foreground">
-                {todayBookings.length}
-              </span>{" "}
-              booking
-              {todayBookings.length > 1 ? "s" : ""} today
-            </div>
-          )}
+          <div className="text-xs text-muted-foreground border-t border-border pt-2">
+            <span className="font-medium text-foreground">
+              {todayBookings.length}
+            </span>{" "}
+            booking
+            {todayBookings.length > 1 ? "s" : ""} today
+          </div>
 
-          <Button size="sm" className="w-full" onClick={() => onBook(room)}>
+          <Button
+            size="sm"
+            className="w-full"
+            onClick={() => BookingStoreActions.openNew(room)}
+          >
             Book {room.name}
           </Button>
         </div>

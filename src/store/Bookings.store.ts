@@ -31,39 +31,39 @@ export const BookingsStore = proxy<{
   editBooking: Booking | undefined;
   preselectedRoom: Room | undefined;
   preselectedDate: string | undefined;
-  bookingForm: BookingForm;
+  // bookingForm: BookingForm;
 }>({
   bookings: [],
   formOpen: false,
   editBooking: undefined,
   preselectedRoom: undefined,
   preselectedDate: undefined,
-  bookingForm: {
-    title: "",
-    roomId: "",
-    date: "",
-    startTime: "09:00",
-    endTime: "10:00",
-    attendees: [] as string[],
-    notes: "",
-  },
+  // bookingForm: {
+  //   title: "",
+  //   roomId: "",
+  //   date: "",
+  //   startTime: "09:00",
+  //   endTime: "10:00",
+  //   attendees: [] as string[],
+  //   notes: "",
+  // },
 });
 
 export const BookingStoreActions = {
   openNew: (room?: Room, date?: string) => {
-    const today = new Date().toISOString().split("T")[0];
+    // const today = new Date().toISOString().split("T")[0];
 
     BookingsStore.editBooking = undefined;
     BookingsStore.preselectedRoom = room;
     BookingsStore.preselectedDate = date;
 
-    BookingsStore.bookingForm.title = "";
-    BookingsStore.bookingForm.roomId = room?.id ?? "";
-    BookingsStore.bookingForm.date = date ?? today;
-    BookingsStore.bookingForm.startTime = "09:00";
-    BookingsStore.bookingForm.endTime = "10:00";
-    BookingsStore.bookingForm.attendees = [];
-    BookingsStore.bookingForm.notes = "";
+    // BookingsStore.bookingForm.title = "";
+    // BookingsStore.bookingForm.roomId = room?.id ?? "";
+    // BookingsStore.bookingForm.date = date ?? today;
+    // BookingsStore.bookingForm.startTime = "09:00";
+    // BookingsStore.bookingForm.endTime = "10:00";
+    // BookingsStore.bookingForm.attendees = [];
+    // BookingsStore.bookingForm.notes = "";
 
     BookingsStore.formOpen = true;
   },
